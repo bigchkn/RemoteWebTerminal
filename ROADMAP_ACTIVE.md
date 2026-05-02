@@ -19,6 +19,7 @@
   - [x] **TF-4**: Add installer lifecycle tests (Parent: TF-2)(`Done`)
   - [x] **TF-5**: Document installer usage in README (Parent: TF-2)(`Done`)
   - [x] **TF-6**: Add service installer CLI commands (Parent: TF-2)(`Done`)
+- [x] **TF-7**: Make launchd install idempotent when service is not loaded(`Done`)
 
 ## Backlog
 

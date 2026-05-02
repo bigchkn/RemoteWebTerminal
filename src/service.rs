@@ -122,13 +122,9 @@ impl LaunchdService {
     }
 
     fn bootout(&self) -> Result<(), ServiceError> {
-        let domain = self.user_domain()?;
-        self.run_launchctl([
-            OsStr::new("bootout"),
-            OsStr::new(&domain),
-            self.plist_path.as_os_str(),
-        ])
-        .map(|_| ())
+        let target = self.service_target()?;
+        self.run_launchctl([OsStr::new("bootout"), OsStr::new(&target)])
+            .map(|_| ())
     }
 
     fn render_plist(&self, options: &InstallOptions) -> String {
@@ -230,6 +226,9 @@ fn ignore_not_loaded(error: ServiceError) -> Result<(), ServiceError> {
         {
             Ok(())
         }
+        ServiceError::CommandFailed {
+            code: 5, stderr, ..
+        } if stderr.contains("Boot-out failed") && stderr.contains("Input/output error") => Ok(()),
         other => Err(other),
     }
 }
@@ -302,5 +301,16 @@ mod tests {
             service.plist_path(),
             Path::new("/Users/example/Library/LaunchAgents/com.remotewebterminal.daemon.plist")
         );
+    }
+
+    #[test]
+    fn launchd_bootout_input_output_error_is_idempotent() {
+        let result = ignore_not_loaded(ServiceError::CommandFailed {
+            program: "launchctl".to_owned(),
+            code: 5,
+            stderr: "Boot-out failed: 5: Input/output error\nTry re-running the command as root for richer errors.".to_owned(),
+        });
+
+        assert!(result.is_ok());
     }
 }
