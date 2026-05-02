@@ -162,3 +162,28 @@ logs = ["Fixed install idempotency when launchctl bootout reports code 5 for an 
 outcome = "done"
 
 [tasks.metadata]
+
+[[tasks]]
+id = "TF-8"
+uid = "bcdc039d-af0b-47de-8c50-d6a97417c381"
+title = "Show existing tmux sessions from installed daemon"
+description = ""
+task_type = "bug"
+status = "done"
+priority = 0
+subtask_uids = []
+milestone_id = "M2"
+designs = []
+tags = []
+created_at = "2026-05-02T22:26:50.692229Z"
+updated_at = "2026-05-02T22:39:39.704844Z"
+completed_at = "2026-05-02T22:39:39.704844Z"
+
+[tasks.execution]
+agent_id = "codex"
+start_time = "2026-05-02T22:26:53.252320Z"
+end_time = "2026-05-02T22:39:39.704844Z"
+logs = ["Fixed installed daemon tmux discovery by pinning the tmux socket, avoiding launchd TMPDIR socket drift, using targeted session pane listing, and parsing with a printable delimiter. Verified /api/sessions returns existing tmux sessions from launchd."]
+outcome = "done"
+
+[tasks.metadata]

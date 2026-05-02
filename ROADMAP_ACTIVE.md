@@ -20,6 +20,7 @@
   - [x] **TF-5**: Document installer usage in README (Parent: TF-2)(`Done`)
   - [x] **TF-6**: Add service installer CLI commands (Parent: TF-2)(`Done`)
 - [x] **TF-7**: Make launchd install idempotent when service is not loaded(`Done`)
+- [x] **TF-8**: Show existing tmux sessions from installed daemon(`Done`)
 
 ## Backlog
 

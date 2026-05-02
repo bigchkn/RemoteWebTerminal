@@ -1,9 +1,13 @@
-use std::io::ErrorKind;
+use std::{env, io::ErrorKind, process::Command as StdCommand};
 
 use serde::Serialize;
 use thiserror::Error;
 use tokio::process::Command;
 use tracing::debug;
+
+const DEFAULT_TMUX_TMPDIR: &str = "/private/tmp";
+const FIELD_SEPARATOR: char = '|';
+const PANE_FORMAT: &str = "#{session_name}|#{window_index}|#{window_name}|#{pane_id}|#{pane_current_command}|#{pane_dead}|#{pane_width}|#{pane_height}";
 
 #[derive(Debug, Error)]
 pub enum TmuxError {
@@ -20,6 +24,7 @@ pub enum TmuxError {
 #[derive(Debug, Clone)]
 pub struct TmuxClient {
     tmux_bin: String,
+    socket_path: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, PartialEq, Eq)]
@@ -48,21 +53,28 @@ pub struct SessionInfo {
 }
 
 impl TmuxClient {
-    pub fn with_binary(tmux_bin: impl Into<String>) -> Self {
+    pub fn new(tmux_bin: impl Into<String>, socket_path: Option<String>) -> Self {
         Self {
             tmux_bin: tmux_bin.into(),
+            socket_path: socket_path.or_else(default_socket_path),
         }
     }
 
     pub async fn sessions(&self) -> Result<Vec<SessionInfo>, TmuxError> {
-        let rows = self
-            .run_tmux(&[
-                "list-panes",
-                "-a",
-                "-F",
-                "#{session_name}\t#{window_index}\t#{window_name}\t#{pane_id}\t#{pane_current_command}\t#{pane_dead}\t#{pane_width}\t#{pane_height}",
-            ])
+        let session_rows = self
+            .run_tmux(&["list-sessions", "-F", "#{session_name}"])
             .await?;
+        let mut rows = String::new();
+
+        for session_name in parse_session_names(&session_rows) {
+            let target = format!("={session_name}");
+            rows.push_str(
+                &self
+                    .run_tmux(&["list-panes", "-t", &target, "-F", PANE_FORMAT])
+                    .await?,
+            );
+        }
+
         Ok(parse_panes(&rows))
     }
 
@@ -107,8 +119,14 @@ impl TmuxClient {
 
     async fn run_tmux(&self, args: &[&str]) -> Result<String, TmuxError> {
         debug!(bin = %self.tmux_bin, ?args, "tmux");
-        let output = Command::new(&self.tmux_bin)
-            .env("TERM", "xterm-256color")
+        let mut command = Command::new(&self.tmux_bin);
+        command.env("TERM", "xterm-256color");
+        command.env("TMUX_TMPDIR", tmux_tmpdir());
+        if let Some(socket_path) = &self.socket_path {
+            command.arg("-S").arg(socket_path);
+        }
+
+        let output = command
             .args(args)
             .output()
             .await
@@ -130,11 +148,48 @@ impl TmuxClient {
     }
 }
 
+fn tmux_tmpdir() -> String {
+    tmux_tmpdir_from(env::var("TMUX_TMPDIR").ok())
+}
+
+fn tmux_tmpdir_from(value: Option<String>) -> String {
+    value.unwrap_or_else(|| DEFAULT_TMUX_TMPDIR.to_owned())
+}
+
+fn default_socket_path() -> Option<String> {
+    env::var("TMUX_SOCKET")
+        .ok()
+        .filter(|value| !value.trim().is_empty())
+        .or_else(socket_path_from_tmux_env)
+        .or_else(|| current_uid().map(|uid| format!("{DEFAULT_TMUX_TMPDIR}/tmux-{uid}/default")))
+}
+
+fn socket_path_from_tmux_env() -> Option<String> {
+    env::var("TMUX")
+        .ok()
+        .and_then(|value| value.split(',').next().map(str::to_owned))
+        .filter(|value| !value.trim().is_empty())
+}
+
+fn current_uid() -> Option<String> {
+    let output = StdCommand::new("id").arg("-u").output().ok()?;
+    if !output.status.success() {
+        return None;
+    }
+
+    let uid = String::from_utf8_lossy(&output.stdout).trim().to_owned();
+    if uid.is_empty() {
+        None
+    } else {
+        Some(uid)
+    }
+}
+
 fn parse_panes(rows: &str) -> Vec<SessionInfo> {
     let mut sessions: Vec<SessionInfo> = Vec::new();
 
     for row in rows.lines().filter(|row| !row.trim().is_empty()) {
-        let fields: Vec<&str> = row.split('\t').collect();
+        let fields: Vec<&str> = row.split(FIELD_SEPARATOR).collect();
         if fields.len() != 8 {
             continue;
         }
@@ -180,13 +235,22 @@ fn parse_panes(rows: &str) -> Vec<SessionInfo> {
     sessions
 }
 
+fn parse_session_names(rows: &str) -> Vec<String> {
+    rows.lines()
+        .map(str::trim)
+        .filter(|row| !row.is_empty())
+        .map(str::to_owned)
+        .collect()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn parse_panes_groups_sessions_windows_and_panes() {
-        let rows = "dev\t0\tzsh\t%1\tzsh\t0\t100\t32\ndev\t1\tlogs\t%2\tless\t0\t80\t24\nops\t0\tbash\t%3\tbash\t1\t120\t40\n";
+        let rows =
+            "dev|0|zsh|%1|zsh|0|100|32\ndev|1|logs|%2|less|0|80|24\nops|0|bash|%3|bash|1|120|40\n";
         let sessions = parse_panes(rows);
 
         assert_eq!(sessions.len(), 2);
@@ -194,5 +258,68 @@ mod tests {
         assert_eq!(sessions[0].windows.len(), 2);
         assert_eq!(sessions[0].windows[0].panes[0].pane_id, "%1");
         assert_eq!(sessions[1].windows[0].panes[0].dead, true);
+    }
+
+    #[test]
+    fn parse_session_names_ignores_empty_lines() {
+        assert_eq!(
+            parse_session_names("dev\n\nops\n"),
+            vec!["dev".to_owned(), "ops".to_owned()]
+        );
+    }
+
+    #[test]
+    fn tmux_tmpdir_defaults_to_interactive_socket_dir() {
+        assert_eq!(tmux_tmpdir_from(None), "/private/tmp");
+    }
+
+    #[test]
+    fn tmux_tmpdir_preserves_explicit_socket_dir() {
+        assert_eq!(
+            tmux_tmpdir_from(Some("/custom/tmux".to_owned())),
+            "/custom/tmux"
+        );
+    }
+
+    #[test]
+    fn socket_path_uses_tmux_socket_env_first() {
+        assert_eq!(
+            socket_path_from_values(
+                Some("/tmp/custom".to_owned()),
+                Some("/tmp/from-tmux,1,2".to_owned()),
+                Some("501".to_owned()),
+            ),
+            Some("/tmp/custom".to_owned())
+        );
+    }
+
+    #[test]
+    fn socket_path_can_parse_tmux_env() {
+        assert_eq!(
+            socket_path_from_values(None, Some("/tmp/from-tmux,1,2".to_owned()), None),
+            Some("/tmp/from-tmux".to_owned())
+        );
+    }
+
+    #[test]
+    fn socket_path_defaults_to_interactive_socket() {
+        assert_eq!(
+            socket_path_from_values(None, None, Some("501".to_owned())),
+            Some("/private/tmp/tmux-501/default".to_owned())
+        );
+    }
+
+    fn socket_path_from_values(
+        tmux_socket: Option<String>,
+        tmux: Option<String>,
+        uid: Option<String>,
+    ) -> Option<String> {
+        tmux_socket
+            .filter(|value| !value.trim().is_empty())
+            .or_else(|| {
+                tmux.and_then(|value| value.split(',').next().map(str::to_owned))
+                    .filter(|value| !value.trim().is_empty())
+            })
+            .or_else(|| uid.map(|uid| format!("{DEFAULT_TMUX_TMPDIR}/tmux-{uid}/default")))
     }
 }

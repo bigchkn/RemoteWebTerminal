@@ -56,6 +56,19 @@ Use a custom bind address or tmux binary with the global options:
 cargo run -- --bind 127.0.0.1:9000 --tmux-bin /opt/homebrew/bin/tmux install
 ```
 
+The installer pins the daemon to the standard interactive tmux socket for the
+current user, such as:
+
+```text
+/private/tmp/tmux-501/default
+```
+
+Override it when your tmux server uses a custom socket:
+
+```bash
+cargo run -- --tmux-socket /path/to/tmux-socket install
+```
+
 When installing a built binary directly:
 
 ```bash

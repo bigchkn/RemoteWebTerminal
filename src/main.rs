@@ -28,6 +28,10 @@ struct Cli {
     #[arg(long, env = "TMUX_BIN", default_value = "tmux", global = true)]
     tmux_bin: String,
 
+    /// tmux server socket path. Defaults to the standard interactive user socket.
+    #[arg(long, env = "TMUX_SOCKET", global = true)]
+    tmux_socket: Option<String>,
+
     #[command(subcommand)]
     command: Option<Command>,
 }
@@ -63,13 +67,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let cli = Cli::parse();
     match cli.command.unwrap_or(Command::Serve) {
-        Command::Serve => serve(cli.bind, cli.tmux_bin).await?,
+        Command::Serve => serve(cli.bind, cli.tmux_bin, cli.tmux_socket).await?,
         Command::Install { bin_path } => {
             let service = LaunchdService::default_for_user()?;
             let bin_path = bin_path.unwrap_or(std::env::current_exe()?);
+            let tmux_socket = cli
+                .tmux_socket
+                .or_else(|| service.default_tmux_socket_path().ok());
             service.install(&InstallOptions {
                 bind: cli.bind,
                 tmux_bin: cli.tmux_bin,
+                tmux_socket,
                 bin_path: bin_path.canonicalize().unwrap_or(bin_path),
             })?;
             println!("installed {}", service.plist_path().display());
@@ -98,8 +106,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-async fn serve(bind: SocketAddr, tmux_bin: String) -> Result<(), Box<dyn std::error::Error>> {
-    let app = app(TmuxClient::with_binary(tmux_bin));
+async fn serve(
+    bind: SocketAddr,
+    tmux_bin: String,
+    tmux_socket: Option<String>,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let app = app(TmuxClient::new(tmux_bin, tmux_socket));
     let listener = tokio::net::TcpListener::bind(bind).await?;
 
     info!("serving tmux web UI at http://{}", bind);

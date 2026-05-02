@@ -13,6 +13,7 @@ const LABEL: &str = "com.remotewebterminal.daemon";
 const LOG_DIR: &str = "Library/Logs/RemoteWebTerminal";
 const PLIST_DIR: &str = "Library/LaunchAgents";
 const PLIST_FILE: &str = "com.remotewebterminal.daemon.plist";
+const DEFAULT_TMUX_TMPDIR: &str = "/private/tmp";
 
 #[derive(Debug, Error)]
 pub enum ServiceError {
@@ -36,6 +37,7 @@ pub enum ServiceError {
 pub struct InstallOptions {
     pub bind: SocketAddr,
     pub tmux_bin: String,
+    pub tmux_socket: Option<String>,
     pub bin_path: PathBuf,
 }
 
@@ -66,6 +68,13 @@ impl LaunchdService {
 
     pub fn plist_path(&self) -> &Path {
         &self.plist_path
+    }
+
+    pub fn default_tmux_socket_path(&self) -> Result<String, ServiceError> {
+        Ok(format!(
+            "{DEFAULT_TMUX_TMPDIR}/tmux-{}/default",
+            current_uid()?
+        ))
     }
 
     pub fn install(&self, options: &InstallOptions) -> Result<(), ServiceError> {
@@ -133,6 +142,16 @@ impl LaunchdService {
         let path = env::var("PATH").unwrap_or_else(|_| {
             "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin".to_owned()
         });
+        let socket_args = options
+            .tmux_socket
+            .as_ref()
+            .map(|socket| {
+                format!(
+                    "    <string>--tmux-socket</string>\n    <string>{}</string>\n",
+                    xml_escape(socket)
+                )
+            })
+            .unwrap_or_default();
 
         format!(
             r#"<?xml version="1.0" encoding="UTF-8"?>
@@ -148,11 +167,14 @@ impl LaunchdService {
     <string>{bind}</string>
     <string>--tmux-bin</string>
     <string>{tmux_bin}</string>
+{socket_args}
   </array>
   <key>EnvironmentVariables</key>
   <dict>
     <key>PATH</key>
     <string>{path}</string>
+    <key>TMUX_TMPDIR</key>
+    <string>{tmux_tmpdir}</string>
   </dict>
   <key>RunAtLoad</key>
   <true/>
@@ -169,6 +191,8 @@ impl LaunchdService {
             bin = xml_escape(&options.bin_path.display().to_string()),
             bind = xml_escape(&options.bind.to_string()),
             tmux_bin = xml_escape(&options.tmux_bin),
+            socket_args = socket_args,
+            tmux_tmpdir = xml_escape(DEFAULT_TMUX_TMPDIR),
             path = xml_escape(&path),
             stdout = xml_escape(&stdout_path.display().to_string()),
             stderr = xml_escape(&stderr_path.display().to_string()),
@@ -263,6 +287,7 @@ mod tests {
         let options = InstallOptions {
             bind: "127.0.0.1:9999".parse().unwrap(),
             tmux_bin: "/opt/homebrew/bin/tmux".into(),
+            tmux_socket: Some("/private/tmp/tmux-501/default".into()),
             bin_path: PathBuf::from("/Applications/Remote Web/remote-web-daemon"),
         };
 
@@ -272,6 +297,10 @@ mod tests {
         assert!(plist.contains("<string>/Applications/Remote Web/remote-web-daemon</string>"));
         assert!(plist.contains("<string>127.0.0.1:9999</string>"));
         assert!(plist.contains("<string>/opt/homebrew/bin/tmux</string>"));
+        assert!(plist.contains("<string>--tmux-socket</string>"));
+        assert!(plist.contains("<string>/private/tmp/tmux-501/default</string>"));
+        assert!(plist.contains("<key>TMUX_TMPDIR</key>"));
+        assert!(plist.contains("<string>/private/tmp</string>"));
         assert!(plist.contains("<key>RunAtLoad</key>"));
         assert!(plist.contains("<key>KeepAlive</key>"));
         assert!(plist
@@ -284,6 +313,7 @@ mod tests {
         let options = InstallOptions {
             bind: "127.0.0.1:8765".parse().unwrap(),
             tmux_bin: "tmux&helper".into(),
+            tmux_socket: Some("/tmp/tmux&socket".into()),
             bin_path: PathBuf::from("/tmp/remote<web>\"daemon\""),
         };
 
@@ -291,6 +321,7 @@ mod tests {
 
         assert!(plist.contains("/tmp/remote&lt;web&gt;&quot;daemon&quot;"));
         assert!(plist.contains("tmux&amp;helper"));
+        assert!(plist.contains("/tmp/tmux&amp;socket"));
     }
 
     #[test]
