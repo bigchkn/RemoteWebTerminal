@@ -71,7 +71,7 @@ pub fn router(state: AppState) -> Router {
         .route("/api/panes/:pane_id/capture", get(capture_pane))
         .route("/api/panes/:pane_id/send-text", post(send_text))
         .route("/api/panes/:pane_id/send-key", post(send_key))
-        .route("/{*path}", get(static_asset))
+        .route("/*path", get(static_asset))
         .with_state(state)
 }
 
