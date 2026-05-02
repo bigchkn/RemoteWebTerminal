@@ -13,12 +13,13 @@ import {
   Stack,
   Checkbox,
   FormControlLabel,
-  Collapse,
   useMediaQuery,
+  BottomNavigation,
+  BottomNavigationAction,
 } from '@mui/material'
 import RefreshIcon from '@mui/icons-material/Refresh'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import ExpandLessIcon from '@mui/icons-material/ExpandLess'
+import ViewListIcon from '@mui/icons-material/ViewList'
+import TerminalIcon from '@mui/icons-material/Terminal'
 import { theme } from './theme'
 import { api, type SessionInfo, type PaneInfo } from './api'
 
@@ -31,7 +32,7 @@ export default function App() {
   const [sessionCmd, setSessionCmd] = useState('')
   const [sendText, setSendText] = useState('')
   const [sendEnter, setSendEnter] = useState(true)
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [mobileTab, setMobileTab] = useState<'sessions' | 'terminal'>('sessions')
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const outputRef = useRef<HTMLPreElement>(null)
   const selectedPaneRef = useRef<PaneInfo | null>(null)
@@ -73,6 +74,7 @@ export default function App() {
 
   const handleSelectPane = async (pane: PaneInfo) => {
     setSelectedPane(pane)
+    if (isMobile) setMobileTab('terminal')
     try {
       const capture = await api.capturePane(pane.pane_id)
       setOutput(capture.output)
@@ -185,131 +187,102 @@ export default function App() {
             flexDirection: { xs: 'column', md: 'row' },
           }}
         >
+
           {/* Sidebar */}
           <Box
             sx={{
+              display: { xs: mobileTab === 'sessions' ? 'flex' : 'none', md: 'block' },
+              flexDirection: 'column',
               width: { md: 340 },
               borderRight: { md: '1px solid' },
-              borderBottom: { xs: '1px solid', md: 'none' },
               borderColor: 'divider',
               bgcolor: '#121619',
               flexShrink: 0,
             }}
           >
-            {/* Mobile toggle header */}
-            {isMobile && (
-              <Box
-                onClick={() => setSidebarOpen(o => !o)}
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  px: 2,
-                  py: 1,
-                  cursor: 'pointer',
-                  userSelect: 'none',
-                }}
-              >
-                <Typography variant="body2" fontWeight={600}>
-                  Sessions
-                  {sessions.length > 0 && (
-                    <Typography component="span" variant="caption" color="text.secondary" sx={{ ml: 1 }}>
-                      ({sessions.length})
-                    </Typography>
-                  )}
-                </Typography>
-                {sidebarOpen ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
-              </Box>
-            )}
-
-            <Collapse in={!isMobile || sidebarOpen}>
-              <Box
-                sx={{
-                  maxHeight: { xs: '40vh', md: 'none' },
-                  overflow: 'auto',
-                  p: 2,
-                }}
-              >
-                <Stack spacing={1.5}>
-                  {sessions.length === 0 ? (
-                    <Typography color="text.secondary" variant="body2" sx={{ p: 1 }}>
-                      No tmux sessions found.
-                    </Typography>
-                  ) : (
-                    sessions.map(session => (
-                      <Paper key={session.name} variant="outlined" sx={{ overflow: 'hidden' }}>
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            px: 1.5,
-                            py: 1,
-                            bgcolor: 'background.paper',
-                          }}
+            <Box sx={{ overflow: 'auto', flex: 1, p: 2 }}>
+              <Stack spacing={1.5}>
+                {sessions.length === 0 ? (
+                  <Typography color="text.secondary" variant="body2" sx={{ p: 1 }}>
+                    No tmux sessions found.
+                  </Typography>
+                ) : (
+                  sessions.map(session => (
+                    <Paper key={session.name} variant="outlined" sx={{ overflow: 'hidden' }}>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          px: 1.5,
+                          py: 1,
+                          bgcolor: 'background.paper',
+                        }}
+                      >
+                        <Typography variant="body2" fontWeight={600}>
+                          {session.name}
+                        </Typography>
+                        <Button
+                          size="small"
+                          color="error"
+                          onClick={() => handleKillSession(session.name)}
                         >
-                          <Typography variant="body2" fontWeight={600}>
-                            {session.name}
-                          </Typography>
-                          <Button
-                            size="small"
-                            color="error"
-                            onClick={() => handleKillSession(session.name)}
+                          Kill
+                        </Button>
+                      </Box>
+                      {session.windows.map(win => (
+                        <Box key={win.index}>
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{ px: 1.5, py: 0.5, display: 'block' }}
                           >
-                            Kill
-                          </Button>
-                        </Box>
-                        {session.windows.map(win => (
-                          <Box key={win.index}>
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                              sx={{ px: 1.5, py: 0.5, display: 'block' }}
+                            {win.index}: {win.name}
+                          </Typography>
+                          {win.panes.map(pane => (
+                            <Button
+                              key={pane.pane_id}
+                              fullWidth
+                              size="small"
+                              variant="outlined"
+                              onClick={() => handleSelectPane(pane)}
+                              sx={{
+                                mx: 1,
+                                mb: 1,
+                                width: 'calc(100% - 16px)',
+                                justifyContent: 'flex-start',
+                                borderColor:
+                                  selectedPane?.pane_id === pane.pane_id
+                                    ? 'primary.main'
+                                    : 'divider',
+                                color:
+                                  selectedPane?.pane_id === pane.pane_id
+                                    ? 'primary.main'
+                                    : 'text.primary',
+                              }}
                             >
-                              {win.index}: {win.name}
-                            </Typography>
-                            {win.panes.map(pane => (
-                              <Button
-                                key={pane.pane_id}
-                                fullWidth
-                                size="small"
-                                variant="outlined"
-                                onClick={() => {
-                                  handleSelectPane(pane)
-                                  if (isMobile) setSidebarOpen(false)
-                                }}
-                                sx={{
-                                  mx: 1,
-                                  mb: 1,
-                                  width: 'calc(100% - 16px)',
-                                  justifyContent: 'flex-start',
-                                  borderColor:
-                                    selectedPane?.pane_id === pane.pane_id
-                                      ? 'primary.main'
-                                      : 'divider',
-                                  color:
-                                    selectedPane?.pane_id === pane.pane_id
-                                      ? 'primary.main'
-                                      : 'text.primary',
-                                }}
-                              >
-                                {pane.pane_id} {pane.current_command}
-                                {pane.dead ? ' (dead)' : ''}
-                              </Button>
-                            ))}
-                          </Box>
-                        ))}
-                      </Paper>
-                    ))
-                  )}
-                </Stack>
-              </Box>
-            </Collapse>
+                              {pane.pane_id} {pane.current_command}
+                              {pane.dead ? ' (dead)' : ''}
+                            </Button>
+                          ))}
+                        </Box>
+                      ))}
+                    </Paper>
+                  ))
+                )}
+              </Stack>
+            </Box>
           </Box>
 
           {/* Terminal panel */}
           <Box
-            sx={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, minHeight: 0 }}
+            sx={{
+              flex: 1,
+              display: { xs: mobileTab === 'terminal' ? 'flex' : 'none', md: 'flex' },
+              flexDirection: 'column',
+              minWidth: 0,
+              minHeight: 0,
+            }}
           >
             <Box
               sx={{
@@ -420,6 +393,24 @@ export default function App() {
             </Box>
           </Box>
         </Box>
+
+        {/* Mobile bottom navigation */}
+        <BottomNavigation
+          value={mobileTab}
+          onChange={(_, v) => setMobileTab(v)}
+          sx={{ display: { xs: 'flex', md: 'none' }, borderTop: '1px solid', borderColor: 'divider' }}
+        >
+          <BottomNavigationAction
+            label="Sessions"
+            value="sessions"
+            icon={<ViewListIcon />}
+          />
+          <BottomNavigationAction
+            label="Terminal"
+            value="terminal"
+            icon={<TerminalIcon />}
+          />
+        </BottomNavigation>
       </Box>
     </ThemeProvider>
   )
