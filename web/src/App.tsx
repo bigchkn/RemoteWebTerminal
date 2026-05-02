@@ -13,8 +13,12 @@ import {
   Stack,
   Checkbox,
   FormControlLabel,
+  Collapse,
+  useMediaQuery,
 } from '@mui/material'
 import RefreshIcon from '@mui/icons-material/Refresh'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import { theme } from './theme'
 import { api, type SessionInfo, type PaneInfo } from './api'
 
@@ -27,6 +31,8 @@ export default function App() {
   const [sessionCmd, setSessionCmd] = useState('')
   const [sendText, setSendText] = useState('')
   const [sendEnter, setSendEnter] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const outputRef = useRef<HTMLPreElement>(null)
   const selectedPaneRef = useRef<PaneInfo | null>(null)
   selectedPaneRef.current = selectedPane
@@ -183,85 +189,122 @@ export default function App() {
           <Box
             sx={{
               width: { md: 340 },
-              maxHeight: { xs: '40vh', md: 'none' },
-              overflow: 'auto',
               borderRight: { md: '1px solid' },
               borderBottom: { xs: '1px solid', md: 'none' },
               borderColor: 'divider',
               bgcolor: '#121619',
-              p: 2,
+              flexShrink: 0,
             }}
           >
-            <Stack spacing={1.5}>
-              {sessions.length === 0 ? (
-                <Typography color="text.secondary" variant="body2" sx={{ p: 1 }}>
-                  No tmux sessions found.
+            {/* Mobile toggle header */}
+            {isMobile && (
+              <Box
+                onClick={() => setSidebarOpen(o => !o)}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  px: 2,
+                  py: 1,
+                  cursor: 'pointer',
+                  userSelect: 'none',
+                }}
+              >
+                <Typography variant="body2" fontWeight={600}>
+                  Sessions
+                  {sessions.length > 0 && (
+                    <Typography component="span" variant="caption" color="text.secondary" sx={{ ml: 1 }}>
+                      ({sessions.length})
+                    </Typography>
+                  )}
                 </Typography>
-              ) : (
-                sessions.map(session => (
-                  <Paper key={session.name} variant="outlined" sx={{ overflow: 'hidden' }}>
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        px: 1.5,
-                        py: 1,
-                        bgcolor: 'background.paper',
-                      }}
-                    >
-                      <Typography variant="body2" fontWeight={600}>
-                        {session.name}
-                      </Typography>
-                      <Button
-                        size="small"
-                        color="error"
-                        onClick={() => handleKillSession(session.name)}
-                      >
-                        Kill
-                      </Button>
-                    </Box>
-                    {session.windows.map(win => (
-                      <Box key={win.index}>
-                        <Typography
-                          variant="caption"
-                          color="text.secondary"
-                          sx={{ px: 1.5, py: 0.5, display: 'block' }}
+                {sidebarOpen ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+              </Box>
+            )}
+
+            <Collapse in={!isMobile || sidebarOpen}>
+              <Box
+                sx={{
+                  maxHeight: { xs: '40vh', md: 'none' },
+                  overflow: 'auto',
+                  p: 2,
+                }}
+              >
+                <Stack spacing={1.5}>
+                  {sessions.length === 0 ? (
+                    <Typography color="text.secondary" variant="body2" sx={{ p: 1 }}>
+                      No tmux sessions found.
+                    </Typography>
+                  ) : (
+                    sessions.map(session => (
+                      <Paper key={session.name} variant="outlined" sx={{ overflow: 'hidden' }}>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            px: 1.5,
+                            py: 1,
+                            bgcolor: 'background.paper',
+                          }}
                         >
-                          {win.index}: {win.name}
-                        </Typography>
-                        {win.panes.map(pane => (
+                          <Typography variant="body2" fontWeight={600}>
+                            {session.name}
+                          </Typography>
                           <Button
-                            key={pane.pane_id}
-                            fullWidth
                             size="small"
-                            variant="outlined"
-                            onClick={() => handleSelectPane(pane)}
-                            sx={{
-                              mx: 1,
-                              mb: 1,
-                              width: 'calc(100% - 16px)',
-                              justifyContent: 'flex-start',
-                              borderColor:
-                                selectedPane?.pane_id === pane.pane_id
-                                  ? 'primary.main'
-                                  : 'divider',
-                              color:
-                                selectedPane?.pane_id === pane.pane_id
-                                  ? 'primary.main'
-                                  : 'text.primary',
-                            }}
+                            color="error"
+                            onClick={() => handleKillSession(session.name)}
                           >
-                            {pane.pane_id} {pane.current_command}
-                            {pane.dead ? ' (dead)' : ''}
+                            Kill
                           </Button>
+                        </Box>
+                        {session.windows.map(win => (
+                          <Box key={win.index}>
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                              sx={{ px: 1.5, py: 0.5, display: 'block' }}
+                            >
+                              {win.index}: {win.name}
+                            </Typography>
+                            {win.panes.map(pane => (
+                              <Button
+                                key={pane.pane_id}
+                                fullWidth
+                                size="small"
+                                variant="outlined"
+                                onClick={() => {
+                                  handleSelectPane(pane)
+                                  if (isMobile) setSidebarOpen(false)
+                                }}
+                                sx={{
+                                  mx: 1,
+                                  mb: 1,
+                                  width: 'calc(100% - 16px)',
+                                  justifyContent: 'flex-start',
+                                  borderColor:
+                                    selectedPane?.pane_id === pane.pane_id
+                                      ? 'primary.main'
+                                      : 'divider',
+                                  color:
+                                    selectedPane?.pane_id === pane.pane_id
+                                      ? 'primary.main'
+                                      : 'text.primary',
+                                }}
+                              >
+                                {pane.pane_id} {pane.current_command}
+                                {pane.dead ? ' (dead)' : ''}
+                              </Button>
+                            ))}
+                          </Box>
                         ))}
-                      </Box>
-                    ))}
-                  </Paper>
-                ))
-              )}
-            </Stack>
+                      </Paper>
+                    ))
+                  )}
+                </Stack>
+              </Box>
+            </Collapse>
           </Box>
 
           {/* Terminal panel */}

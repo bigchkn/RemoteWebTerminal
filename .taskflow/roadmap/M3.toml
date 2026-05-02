@@ -4,16 +4,19 @@ uid = "91f99292-d32d-4e02-8302-4a918aa24f0a"
 title = "Add collapsible session sidebar toggle for mobile"
 description = ""
 task_type = "feature"
-status = "backlog"
+status = "done"
 priority = 0
 subtask_uids = []
 milestone_id = "M3"
 designs = []
 tags = []
 created_at = "2026-05-02T23:06:53.372926Z"
-updated_at = "2026-05-02T23:06:53.372926Z"
+updated_at = "2026-05-02T23:39:15.454193Z"
+completed_at = "2026-05-02T23:39:15.454193Z"
 
 [tasks.execution]
+agent_id = "Claude Sonnet 4.6"
+start_time = "2026-05-02T23:36:45.429184Z"
 logs = []
 
 [tasks.metadata]
@@ -104,16 +107,21 @@ uid = "1326b059-5a66-464a-9feb-24ca813f4ff7"
 title = "Integrate Material UI component library for consistent mobile-first UI"
 description = ""
 task_type = "feature"
-status = "backlog"
+status = "done"
 priority = 0
 subtask_uids = []
 milestone_id = "M3"
 designs = []
 tags = []
 created_at = "2026-05-02T23:12:03.019421Z"
-updated_at = "2026-05-02T23:12:03.019421Z"
+updated_at = "2026-05-02T23:32:26.315156Z"
+completed_at = "2026-05-02T23:32:26.315156Z"
 
 [tasks.execution]
-logs = []
+agent_id = "Claude Sonnet 4.6"
+start_time = "2026-05-02T23:16:13.964210Z"
+end_time = "2026-05-02T23:32:26.315156Z"
+logs = ["Replaced vanilla JS frontend with React + MUI. Added Vite build pipeline (web/src/), build.rs to auto-build before cargo compile, include_dir to embed dist/ in binary, and catch-all static asset handler in routes.rs."]
+outcome = "success"
 
 [tasks.metadata]
