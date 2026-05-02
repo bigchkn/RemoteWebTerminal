@@ -21,6 +21,48 @@ The daemon binds to `127.0.0.1:8765` by default. Override it with:
 cargo run -- --bind 127.0.0.1:9000
 ```
 
+## Install as a macOS Service
+
+Install a user-level `launchd` service:
+
+```bash
+cargo run -- install
+```
+
+The installer writes:
+
+```text
+~/Library/LaunchAgents/com.remotewebterminal.daemon.plist
+```
+
+It runs without `sudo`, binds to `127.0.0.1:8765` by default, and writes logs to:
+
+```text
+~/Library/Logs/RemoteWebTerminal/
+```
+
+Lifecycle commands:
+
+```bash
+cargo run -- status
+cargo run -- stop
+cargo run -- start
+cargo run -- uninstall
+```
+
+Use a custom bind address or tmux binary with the global options:
+
+```bash
+cargo run -- --bind 127.0.0.1:9000 --tmux-bin /opt/homebrew/bin/tmux install
+```
+
+When installing a built binary directly:
+
+```bash
+cargo build --release
+./target/release/remote-web-daemon install
+```
+
 ## Features
 
 - List tmux sessions, windows, and panes.

@@ -4,7 +4,7 @@ uid = "1b06f1af-7672-40e2-92c7-961f0d2f9a88"
 title = "Create installer for running remote-web-daemon as a local service"
 description = ""
 task_type = "feature"
-status = "backlog"
+status = "done"
 priority = 0
 subtask_uids = [
     "dcc95109-b07a-4e6d-ac7a-314f0e7735d4",
@@ -15,7 +15,8 @@ subtask_uids = [
 milestone_id = "M2"
 tags = []
 created_at = "2026-05-02T19:18:59.959959Z"
-updated_at = "2026-05-02T19:20:45.490152Z"
+updated_at = "2026-05-02T22:17:29.511378Z"
+completed_at = "2026-05-02T22:17:29.511378Z"
 
 [[tasks.designs]]
 design_type = "lld"
@@ -25,7 +26,11 @@ created_at = "2026-05-02T19:19:02.470643Z"
 updated_at = "2026-05-02T19:20:45.490152Z"
 
 [tasks.execution]
-logs = []
+agent_id = "codex"
+start_time = "2026-05-02T22:13:41.325275Z"
+end_time = "2026-05-02T22:17:29.511377Z"
+logs = ["Implemented macOS user launchd installer with CLI lifecycle commands, tests, and README documentation."]
+outcome = "done"
 
 [tasks.metadata]
 
@@ -35,7 +40,7 @@ uid = "a9d308ac-bac7-4ece-b546-41d75f4ea3b5"
 title = "Generate and manage user launchd plist"
 description = ""
 task_type = "feature"
-status = "backlog"
+status = "done"
 priority = 0
 parent_id = "1b06f1af-7672-40e2-92c7-961f0d2f9a88"
 subtask_uids = []
@@ -43,10 +48,15 @@ milestone_id = "M2"
 designs = []
 tags = []
 created_at = "2026-05-02T19:20:52.840529Z"
-updated_at = "2026-05-02T19:20:52.840529Z"
+updated_at = "2026-05-02T22:17:05.044297Z"
+completed_at = "2026-05-02T22:17:05.044296Z"
 
 [tasks.execution]
-logs = []
+agent_id = "codex"
+start_time = "2026-05-02T22:17:01.908734Z"
+end_time = "2026-05-02T22:17:05.044296Z"
+logs = ["Added launchd plist generation and user-level service lifecycle management."]
+outcome = "done"
 
 [tasks.metadata]
 
@@ -56,7 +66,7 @@ uid = "8f450882-b71f-4c21-9eb2-de5a4c8c226a"
 title = "Add installer lifecycle tests"
 description = ""
 task_type = "feature"
-status = "backlog"
+status = "done"
 priority = 0
 parent_id = "1b06f1af-7672-40e2-92c7-961f0d2f9a88"
 subtask_uids = []
@@ -64,10 +74,15 @@ milestone_id = "M2"
 designs = []
 tags = []
 created_at = "2026-05-02T19:20:52.871448Z"
-updated_at = "2026-05-02T19:20:52.871448Z"
+updated_at = "2026-05-02T22:17:14.504231Z"
+completed_at = "2026-05-02T22:17:14.504230Z"
 
 [tasks.execution]
-logs = []
+agent_id = "codex"
+start_time = "2026-05-02T22:17:11.911418Z"
+end_time = "2026-05-02T22:17:14.504230Z"
+logs = ["Added unit tests for generated plist content, XML escaping, and user LaunchAgent paths."]
+outcome = "done"
 
 [tasks.metadata]
 
@@ -77,7 +92,7 @@ uid = "e911af2d-d8d4-43f7-9a4b-e9a49d64c9cc"
 title = "Document installer usage in README"
 description = ""
 task_type = "feature"
-status = "backlog"
+status = "done"
 priority = 0
 parent_id = "1b06f1af-7672-40e2-92c7-961f0d2f9a88"
 subtask_uids = []
@@ -85,10 +100,15 @@ milestone_id = "M2"
 designs = []
 tags = []
 created_at = "2026-05-02T19:20:52.888644Z"
-updated_at = "2026-05-02T19:20:52.888644Z"
+updated_at = "2026-05-02T22:17:19.421759Z"
+completed_at = "2026-05-02T22:17:19.421759Z"
 
 [tasks.execution]
-logs = []
+agent_id = "codex"
+start_time = "2026-05-02T22:17:16.775606Z"
+end_time = "2026-05-02T22:17:19.421759Z"
+logs = ["Documented macOS launchd installer, lifecycle commands, paths, and custom options in README."]
+outcome = "done"
 
 [tasks.metadata]
 
@@ -98,7 +118,7 @@ uid = "dcc95109-b07a-4e6d-ac7a-314f0e7735d4"
 title = "Add service installer CLI commands"
 description = ""
 task_type = "feature"
-status = "backlog"
+status = "done"
 priority = 0
 parent_id = "1b06f1af-7672-40e2-92c7-961f0d2f9a88"
 subtask_uids = []
@@ -106,9 +126,14 @@ milestone_id = "M2"
 designs = []
 tags = []
 created_at = "2026-05-02T19:21:05.405091Z"
-updated_at = "2026-05-02T19:21:05.405091Z"
+updated_at = "2026-05-02T22:17:09.747271Z"
+completed_at = "2026-05-02T22:17:09.747271Z"
 
 [tasks.execution]
-logs = []
+agent_id = "codex"
+start_time = "2026-05-02T22:17:07.202717Z"
+end_time = "2026-05-02T22:17:09.747270Z"
+logs = ["Added serve, install, uninstall, start, stop, and status CLI commands."]
+outcome = "done"
 
 [tasks.metadata]
