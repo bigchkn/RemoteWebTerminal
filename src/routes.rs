@@ -1,15 +1,19 @@
 use std::sync::Arc;
 
 use axum::{
+    body::Bytes,
     extract::{Path, Query, State},
     http::{header, StatusCode},
-    response::{Html, IntoResponse, Response},
+    response::{IntoResponse, Response},
     routing::{delete, get, post},
     Json, Router,
 };
+use include_dir::{include_dir, Dir};
 use serde::{Deserialize, Serialize};
 
 use crate::tmux::{SessionInfo, TmuxClient, TmuxError};
+
+static DIST: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/web/dist");
 
 #[derive(Clone)]
 pub struct AppState {
@@ -60,8 +64,6 @@ impl AppState {
 pub fn router(state: AppState) -> Router {
     Router::new()
         .route("/", get(index))
-        .route("/app.js", get(javascript))
-        .route("/styles.css", get(styles))
         .route("/api/health", get(health))
         .route("/api/sessions", get(list_sessions).post(create_session))
         .route("/api/sessions/:name", delete(kill_session))
@@ -69,28 +71,30 @@ pub fn router(state: AppState) -> Router {
         .route("/api/panes/:pane_id/capture", get(capture_pane))
         .route("/api/panes/:pane_id/send-text", post(send_text))
         .route("/api/panes/:pane_id/send-key", post(send_key))
+        .route("/{*path}", get(static_asset))
         .with_state(state)
 }
 
-async fn index() -> Html<&'static str> {
-    Html(include_str!("../web/index.html"))
+async fn index() -> Response {
+    serve_dist_file("index.html")
 }
 
-async fn javascript() -> impl IntoResponse {
-    (
-        [(
-            header::CONTENT_TYPE,
-            "application/javascript; charset=utf-8",
-        )],
-        include_str!("../web/app.js"),
-    )
+async fn static_asset(Path(path): Path<String>) -> Response {
+    serve_dist_file(&path)
 }
 
-async fn styles() -> impl IntoResponse {
-    (
-        [(header::CONTENT_TYPE, "text/css; charset=utf-8")],
-        include_str!("../web/styles.css"),
-    )
+fn serve_dist_file(path: &str) -> Response {
+    match DIST.get_file(path) {
+        Some(file) => {
+            let mime = mime_guess::from_path(path).first_or_octet_stream();
+            (
+                [(header::CONTENT_TYPE, mime.to_string())],
+                Bytes::from_static(file.contents()),
+            )
+                .into_response()
+        }
+        None => StatusCode::NOT_FOUND.into_response(),
+    }
 }
 
 async fn health() -> Json<serde_json::Value> {
