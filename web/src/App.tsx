@@ -133,7 +133,18 @@ export default function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}>
+      <Box
+        sx={{
+          height: '100dvh',
+          display: 'flex',
+          flexDirection: 'column',
+          // safe-area insets for notched phones
+          paddingTop: 'env(safe-area-inset-top)',
+          paddingLeft: 'env(safe-area-inset-left)',
+          paddingRight: 'env(safe-area-inset-right)',
+          // bottom padding handled by BottomNavigation
+        }}
+      >
         <AppBar
           position="static"
           elevation={0}
@@ -332,6 +343,7 @@ export default function App() {
               ref={outputRef}
               sx={{
                 flex: 1,
+                flexShrink: 1,
                 m: 0,
                 p: 2,
                 overflow: 'auto',

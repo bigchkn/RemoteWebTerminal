@@ -73,5 +73,14 @@ export const theme = createTheme({
     MuiAppBar: {
       styleOverrides: { root: { backgroundImage: 'none' } },
     },
+    MuiBottomNavigation: {
+      styleOverrides: {
+        root: {
+          // account for home indicator on iOS/Android
+          paddingBottom: 'env(safe-area-inset-bottom)',
+          height: 'calc(56px + env(safe-area-inset-bottom))',
+        },
+      },
+    },
   },
 })
