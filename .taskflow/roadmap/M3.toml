@@ -1,0 +1,119 @@
+[[tasks]]
+id = "TF-9"
+uid = "91f99292-d32d-4e02-8302-4a918aa24f0a"
+title = "Add collapsible session sidebar toggle for mobile"
+description = ""
+task_type = "feature"
+status = "backlog"
+priority = 0
+subtask_uids = []
+milestone_id = "M3"
+designs = []
+tags = []
+created_at = "2026-05-02T23:06:53.372926Z"
+updated_at = "2026-05-02T23:06:53.372926Z"
+
+[tasks.execution]
+logs = []
+
+[tasks.metadata]
+
+[[tasks]]
+id = "TF-10"
+uid = "dc770df1-0a08-4e3c-b999-7abf2a5c0961"
+title = "Increase touch target sizes and font scaling on mobile"
+description = ""
+task_type = "feature"
+status = "backlog"
+priority = 0
+subtask_uids = []
+milestone_id = "M3"
+designs = []
+tags = []
+created_at = "2026-05-02T23:06:53.377728Z"
+updated_at = "2026-05-02T23:06:53.377728Z"
+
+[tasks.execution]
+logs = []
+
+[tasks.metadata]
+
+[[tasks]]
+id = "TF-11"
+uid = "002d905d-e633-4853-aca5-a4956e432b88"
+title = "Add tab-bar navigation between sessions and terminal on mobile"
+description = ""
+task_type = "feature"
+status = "backlog"
+priority = 0
+subtask_uids = []
+milestone_id = "M3"
+designs = []
+tags = []
+created_at = "2026-05-02T23:06:53.382414Z"
+updated_at = "2026-05-02T23:06:53.382414Z"
+
+[tasks.execution]
+logs = []
+
+[tasks.metadata]
+
+[[tasks]]
+id = "TF-12"
+uid = "74f3e278-7b4b-4bba-832d-7bd1662ba855"
+title = "Handle safe-area insets and virtual keyboard layout on mobile"
+description = ""
+task_type = "feature"
+status = "backlog"
+priority = 0
+subtask_uids = []
+milestone_id = "M3"
+designs = []
+tags = []
+created_at = "2026-05-02T23:06:53.386776Z"
+updated_at = "2026-05-02T23:06:53.386776Z"
+
+[tasks.execution]
+logs = []
+
+[tasks.metadata]
+
+[[tasks]]
+id = "TF-13"
+uid = "459f7b6e-4965-4e4b-af7c-f066a1aa4388"
+title = "Improve send-input UX for mobile keyboard"
+description = ""
+task_type = "feature"
+status = "backlog"
+priority = 0
+subtask_uids = []
+milestone_id = "M3"
+designs = []
+tags = []
+created_at = "2026-05-02T23:06:53.390927Z"
+updated_at = "2026-05-02T23:06:53.390927Z"
+
+[tasks.execution]
+logs = []
+
+[tasks.metadata]
+
+[[tasks]]
+id = "TF-14"
+uid = "1326b059-5a66-464a-9feb-24ca813f4ff7"
+title = "Integrate Material UI component library for consistent mobile-first UI"
+description = ""
+task_type = "feature"
+status = "backlog"
+priority = 0
+subtask_uids = []
+milestone_id = "M3"
+designs = []
+tags = []
+created_at = "2026-05-02T23:12:03.019421Z"
+updated_at = "2026-05-02T23:12:03.019421Z"
+
+[tasks.execution]
+logs = []
+
+[tasks.metadata]

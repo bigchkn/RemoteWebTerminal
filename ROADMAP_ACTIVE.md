@@ -22,6 +22,16 @@
 - [x] **TF-7**: Make launchd install idempotent when service is not loaded(`Done`)
 - [x] **TF-8**: Show existing tmux sessions from installed daemon(`Done`)
 
+### Mobile usability (M3)
+**Status:** Todo
+
+- [ ] **TF-9**: Add collapsible session sidebar toggle for mobile(`Backlog`)
+- [ ] **TF-10**: Increase touch target sizes and font scaling on mobile(`Backlog`)
+- [ ] **TF-11**: Add tab-bar navigation between sessions and terminal on mobile(`Backlog`)
+- [ ] **TF-12**: Handle safe-area insets and virtual keyboard layout on mobile(`Backlog`)
+- [ ] **TF-13**: Improve send-input UX for mobile keyboard(`Backlog`)
+- [ ] **TF-14**: Integrate Material UI component library for consistent mobile-first UI(`Backlog`)
+
 ## Backlog
 
 _Backlog is empty._

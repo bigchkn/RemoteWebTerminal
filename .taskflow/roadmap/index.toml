@@ -19,3 +19,13 @@ description = ""
 status = "todo"
 path = "roadmap/M2.toml"
 designs = []
+
+[[milestones]]
+id = "M3"
+name = "Mobile usability"
+description = ""
+status = "todo"
+path = "roadmap/M3.toml"
+designs = []
+
+[config]
