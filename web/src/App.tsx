@@ -11,11 +11,11 @@ import {
   Paper,
   IconButton,
   Stack,
-  Checkbox,
-  FormControlLabel,
   useMediaQuery,
   BottomNavigation,
   BottomNavigationAction,
+  ToggleButton,
+  Tooltip,
 } from '@mui/material'
 import RefreshIcon from '@mui/icons-material/Refresh'
 import ViewListIcon from '@mui/icons-material/ViewList'
@@ -35,6 +35,7 @@ export default function App() {
   const [mobileTab, setMobileTab] = useState<'sessions' | 'terminal'>('sessions')
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const outputRef = useRef<HTMLPreElement>(null)
+  const sendInputRef = useRef<HTMLInputElement>(null)
   const selectedPaneRef = useRef<PaneInfo | null>(null)
   selectedPaneRef.current = selectedPane
 
@@ -74,7 +75,11 @@ export default function App() {
 
   const handleSelectPane = async (pane: PaneInfo) => {
     setSelectedPane(pane)
-    if (isMobile) setMobileTab('terminal')
+    if (isMobile) {
+      setMobileTab('terminal')
+      // focus send field after the panel becomes visible
+      setTimeout(() => sendInputRef.current?.focus(), 50)
+    }
     try {
       const capture = await api.capturePane(pane.pane_id)
       setOutput(capture.output)
@@ -375,6 +380,7 @@ export default function App() {
               }}
             >
               <TextField
+                inputRef={sendInputRef}
                 size="small"
                 fullWidth
                 placeholder="type input for selected pane"
@@ -382,18 +388,30 @@ export default function App() {
                 onChange={e => setSendText(e.target.value)}
                 disabled={!selectedPane}
                 autoComplete="off"
+                slotProps={{
+                  htmlInput: {
+                    inputMode: 'text',
+                    enterKeyHint: sendEnter ? 'send' : 'done',
+                  },
+                }}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault()
+                    handleSend(e as unknown as React.FormEvent)
+                  }
+                }}
               />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    size="small"
-                    checked={sendEnter}
-                    onChange={e => setSendEnter(e.target.checked)}
-                  />
-                }
-                label={<Typography variant="caption">Enter</Typography>}
-                sx={{ m: 0, whiteSpace: 'nowrap' }}
-              />
+              <Tooltip title={sendEnter ? 'Sends ↵ Enter after text' : 'Sends text only'} placement="top">
+                <ToggleButton
+                  value="enter"
+                  selected={sendEnter}
+                  onChange={() => setSendEnter(v => !v)}
+                  size="small"
+                  sx={{ whiteSpace: 'nowrap', px: 1 }}
+                >
+                  ↵
+                </ToggleButton>
+              </Tooltip>
               <Button
                 type="submit"
                 variant="contained"
