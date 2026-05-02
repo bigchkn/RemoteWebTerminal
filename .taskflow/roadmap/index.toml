@@ -11,3 +11,11 @@ description = ""
 status = "todo"
 path = "roadmap/M1.toml"
 designs = []
+
+[[milestones]]
+id = "M2"
+name = "Daemon installer"
+description = ""
+status = "todo"
+path = "roadmap/M2.toml"
+designs = []
