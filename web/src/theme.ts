@@ -15,7 +15,60 @@ export const theme = createTheme({
   },
   components: {
     MuiButton: {
-      styleOverrides: { root: { textTransform: 'none' } },
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+          // 44px minimum per Apple HIG / Android touch target guidelines
+          minHeight: 44,
+          minWidth: 44,
+          '@media (min-width: 900px)': {
+            minHeight: 34,
+          },
+        },
+        sizeSmall: {
+          minHeight: 44,
+          '@media (min-width: 900px)': {
+            minHeight: 34,
+          },
+        },
+      },
+    },
+    MuiIconButton: {
+      styleOverrides: {
+        root: {
+          minHeight: 44,
+          minWidth: 44,
+          '@media (min-width: 900px)': {
+            minHeight: 36,
+            minWidth: 36,
+          },
+        },
+      },
+    },
+    MuiCheckbox: {
+      styleOverrides: {
+        root: {
+          padding: 10,
+          '@media (min-width: 900px)': {
+            padding: 4,
+          },
+        },
+      },
+    },
+    MuiTextField: {
+      defaultProps: { size: 'small' },
+      styleOverrides: {
+        root: {
+          '& .MuiInputBase-root': {
+            minHeight: 44,
+            fontSize: '1rem',
+            '@media (min-width: 900px)': {
+              minHeight: 34,
+              fontSize: '0.875rem',
+            },
+          },
+        },
+      },
     },
     MuiAppBar: {
       styleOverrides: { root: { backgroundImage: 'none' } },

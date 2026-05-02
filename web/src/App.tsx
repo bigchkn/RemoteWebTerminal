@@ -366,8 +366,8 @@ export default function App() {
                 color: '#d7f7df',
                 fontFamily:
                   'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace',
-                fontSize: '0.8125rem',
-                lineHeight: 1.45,
+                fontSize: { xs: '0.9375rem', md: '0.8125rem' },
+                lineHeight: 1.5,
                 whiteSpace: 'pre-wrap',
                 minHeight: 200,
               }}

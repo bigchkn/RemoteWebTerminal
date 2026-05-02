@@ -26,7 +26,7 @@
 **Status:** Todo
 
 - [x] **TF-9**: Add collapsible session sidebar toggle for mobile(`Done`)
-- [ ] **TF-10**: Increase touch target sizes and font scaling on mobile(`Backlog`)
+- [ ] **TF-10**: Increase touch target sizes and font scaling on mobile(`InProgress`)
 - [ ] **TF-11**: Add tab-bar navigation between sessions and terminal on mobile(`Backlog`)
 - [ ] **TF-12**: Handle safe-area insets and virtual keyboard layout on mobile(`Backlog`)
 - [ ] **TF-13**: Improve send-input UX for mobile keyboard(`Backlog`)
