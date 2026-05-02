@@ -1,0 +1,30 @@
+[[tasks]]
+id = "TF-1"
+uid = "e40fd001-6855-480d-bcc2-f361acdc4cf6"
+title = "Build localhost daemon for tmux session management"
+description = ""
+task_type = "feature"
+status = "done"
+priority = 0
+subtask_uids = []
+milestone_id = "M1"
+tags = []
+created_at = "2026-05-02T19:04:41.649960Z"
+updated_at = "2026-05-02T19:10:31.783483Z"
+completed_at = "2026-05-02T19:10:31.783483Z"
+
+[[tasks.designs]]
+design_type = "lld"
+path = "docs/designs/M1/TF-1/lld-local-tmux-web-daemon.md"
+status = "approved"
+created_at = "2026-05-02T19:04:44.339113Z"
+updated_at = "2026-05-02T19:10:28.668458Z"
+
+[tasks.execution]
+agent_id = "codex"
+start_time = "2026-05-02T19:04:53.688436Z"
+end_time = "2026-05-02T19:10:31.783482Z"
+logs = ["Built localhost Axum daemon with embedded web UI and tmux session APIs; verified with cargo fmt --check, cargo check, cargo test, TaskFlowAI milestone validation, and localhost smoke tests."]
+outcome = "success"
+
+[tasks.metadata]

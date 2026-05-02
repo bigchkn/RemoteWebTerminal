@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Remote Web Terminal</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div>
+          <h1>Remote Web Terminal</h1>
+          <p id="status">Connecting to localhost daemon...</p>
+        </div>
+        <form id="new-session-form" class="session-form">
+          <input id="session-name" name="name" autocomplete="off" placeholder="session name" />
+          <input id="session-command" name="command" autocomplete="off" placeholder="command (optional)" />
+          <button type="submit">New Session</button>
+        </form>
+      </header>
+
+      <section class="layout">
+        <aside class="sidebar">
+          <div class="sidebar-heading">
+            <h2>Sessions</h2>
+            <button id="refresh" type="button">Refresh</button>
+          </div>
+          <div id="sessions" class="sessions"></div>
+        </aside>
+
+        <section class="terminal-panel">
+          <div class="terminal-toolbar">
+            <div>
+              <h2 id="pane-title">No pane selected</h2>
+              <p id="pane-meta"></p>
+            </div>
+            <div class="toolbar-actions">
+              <button id="interrupt" type="button" disabled>Ctrl-C</button>
+              <button id="kill-pane" type="button" disabled>Kill Pane</button>
+            </div>
+          </div>
+          <pre id="terminal-output" class="terminal-output"></pre>
+          <form id="send-form" class="send-form">
+            <input id="send-text" autocomplete="off" placeholder="type input for selected pane" disabled />
+            <label><input id="send-enter" type="checkbox" checked /> Enter</label>
+            <button id="send-button" type="submit" disabled>Send</button>
+          </form>
+        </section>
+      </section>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+</html>
